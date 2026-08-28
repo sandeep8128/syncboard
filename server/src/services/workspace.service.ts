@@ -118,3 +118,64 @@ export const addWorkspaceMember = async (
 
   return workspace;
 };
+
+// Remove a member from a workspace
+export const removeWorkspaceMember = async (
+  workspaceId: string,
+  userId: string
+) => {
+  const workspace = await Workspace.findById(workspaceId);
+
+  if (!workspace) {
+    throw new Error("WORKSPACE_NOT_FOUND");
+  }
+
+  const memberIndex = workspace.members.findIndex(
+    (member) => member.user.toString() === userId
+  );
+
+  if (memberIndex === -1) {
+    throw new Error("MEMBER_NOT_FOUND");
+  }
+
+  if (workspace.members[memberIndex].role === "owner") {
+    throw new Error("CANNOT_REMOVE_OWNER");
+  }
+
+  workspace.members.splice(memberIndex, 1);
+
+  await workspace.save();
+
+  return workspace;
+};
+
+// Change a member's role in a workspace
+export const updateWorkspaceMemberRole = async (
+  workspaceId: string,
+  userId: string,
+  role: WorkspaceRole
+) => {
+  const workspace = await Workspace.findById(workspaceId);
+
+  if (!workspace) {
+    throw new Error("WORKSPACE_NOT_FOUND");
+  }
+
+  const member = workspace.members.find(
+    (member) => member.user.toString() === userId
+  );
+
+  if (!member) {
+    throw new Error("MEMBER_NOT_FOUND");
+  }
+
+  if (member.role === "owner") {
+    throw new Error("CANNOT_CHANGE_OWNER_ROLE");
+  }
+
+  member.role = role;
+
+  await workspace.save();
+
+  return workspace;
+};

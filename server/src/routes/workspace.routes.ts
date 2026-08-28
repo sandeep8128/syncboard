@@ -1,10 +1,12 @@
 import { Router } from "express";
 
 import {
-    addMember,
+  addMember,
   createWorkspace,
   getMyWorkspaces,
   getWorkspace,
+  removeMember,
+  updateMemberRole,
 } from "../controllers/workspace.controller.js";
 
 import { protect } from "../middleware/auth.middleware.js";
@@ -24,7 +26,21 @@ router.post(
   "/:workspaceId/members",
   protect,
   workspaceRole("owner", "admin"),
-  addMember
+  addMember,
+);
+// Remove a workspace member
+router.delete(
+  "/:workspaceId/members/:userId",
+  protect,
+  workspaceRole("owner", "admin"),
+  removeMember,
 );
 
+// Change a workspace member's role
+router.patch(
+  "/:workspaceId/members/:userId/role",
+  protect,
+  workspaceRole("owner", "admin"),
+  updateMemberRole,
+);
 export default router;
